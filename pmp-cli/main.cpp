@@ -1,9 +1,12 @@
 #include <QCoreApplication>
 #include <../player/player.h>
 #include <../playList/playlist.h>
-#include <cli.h>
+#include <../cli/cli.h>
+//#include <cli.h>
+#include "inputloop.h"
 #include <QCommandLineParser>
 #include <QDebug>
+#include <QtCore>
 
 int main(int argc, char *argv[])
 {
@@ -11,7 +14,9 @@ int main(int argc, char *argv[])
 	QCommandLineParser pa;
 	Player p;
 	PlayList pl;
-	cli* c = new cli(&p,&pl);
+	//cli* c = new cli(&p,&pl);
+	Cli cli(&a, &p, &pl);
+	inputLoop in(&a, &cli, &p, &pl);
 
 	a.setApplicationName("pmp-cli");
 	a.setApplicationVersion(APP_VERSION);
@@ -33,7 +38,7 @@ int main(int argc, char *argv[])
 		{"q","Do not wait for commands between playing files"},
 		{"r","Index in playlist to start from","entry"},
 		{"t","Force stereo"},
-		{"x","Don't create .sett file"}
+		{"x","Create __savefile"}
 	});
 
 	pa.process(a);
@@ -54,12 +59,12 @@ int main(int argc, char *argv[])
 	if(pa.isSet("c")) p.setCacheSize(pa.value("c").toInt());
 	p.createArgList();
 
-	c->setNoSett(pa.isSet("x"));
-	c->setDeleteFile(pa.isSet("d"));
-	c->setMoveFile(pa.isSet("m"));
-	c->setQuiet(pa.isSet("q"));
-	c->setNoDelete(pa.isSet("D"));
-	c->run();
+	cli.setNosett(!pa.isSet("x"));
+	cli.setDeleteFile(pa.isSet("d"));
+	cli.setMoveFile(pa.isSet("m"));
+	cli.setNodelete(pa.isSet("D"));
+	in.setQuiet(pa.isSet("q"));
+	in.run();
 
 	//return a.exec();
 }

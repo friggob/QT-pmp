@@ -10,7 +10,7 @@ CONFIG -= app_bundle
 TEMPLATE = app
 
 SOURCES += main.cpp \
-    cli.cpp
+    inputloop.cpp
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which as been marked deprecated (the exact warnings
@@ -38,7 +38,7 @@ INCLUDEPATH += $$PWD/../playList
 DEPENDPATH += $$PWD/../playList
 
 HEADERS += \
-    cli.h
+    inputloop.h
 
 LIBS += \
 		-lreadline
@@ -46,3 +46,14 @@ LIBS += \
 VERSION = 0.2.0
 
 DEFINES += APP_VERSION=\\\"$$VERSION\\\"
+
+win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../cli/release/ -lcli
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../cli/debug/ -lcli
+else:unix: LIBS += -L$$OUT_PWD/../cli/ -lcli
+
+INCLUDEPATH += $$PWD/../cli
+DEPENDPATH += $$PWD/../cli
+
+DISTFILES += \
+    cli.h.old \
+    cli.cpp.old

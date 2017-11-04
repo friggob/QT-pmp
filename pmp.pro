@@ -4,4 +4,5 @@ SUBDIRS += \
     pmp-gui \
     pmp-cli \
     playList \
-    player
+    player \
+    cli

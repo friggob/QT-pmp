@@ -112,7 +112,7 @@ bool PlayList::savePlaylist(QFile* f,bool si = true)
 	foreach(QString x, pList){
 		QString num;
 		num = QString::number(pList.indexOf(x));
-		if(pList.indexOf(x) == pIndex && si)
+		if(pList.indexOf(x) == pIndex && si && (pIndex != getMaxIndex()))
 			f->write("*");
 		f->write(x.toLocal8Bit()+"\n");
 	}
