@@ -47,3 +47,10 @@ else:unix: LIBS += -L$$OUT_PWD/../playList/ -lplayList
 
 INCLUDEPATH += $$PWD/../playList
 DEPENDPATH += $$PWD/../playList
+
+win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../cli/release/ -lcli
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../cli/debug/ -lcli
+else:unix: LIBS += -L$$OUT_PWD/../cli/ -lcli
+
+INCLUDEPATH += $$PWD/../cli
+DEPENDPATH += $$PWD/../cli

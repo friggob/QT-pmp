@@ -1,7 +1,7 @@
 #include "pmpgui.h"
 #include "ui_pmpgui.h"
 
-pmpGui::pmpGui(QWidget *parent) :
+pmpGui::pmpGui(QWidget *parent, Cli* c, Player* p, PlayList* l) :
 	QMainWindow(parent),
 	ui(new Ui::pmpGui)
 {
@@ -10,127 +10,76 @@ pmpGui::pmpGui(QWidget *parent) :
 	ui->mainToolBar->hide();
 	le = ui->cmdBox;
 	le->setFocus();
+	cli = c;
+	mp = p;
+	pl = l;
+	connect(cli,SIGNAL(helpAvailable()),this,SLOT(printHelp()));
+	connect(cli,SIGNAL(playlistAvailable()),this,SLOT(printPlayList()));
+	connect(cli,SIGNAL(statusAvailable(QString)),this->statusBar(),SLOT(showMessage(QString)));
 }
 
-pmpGui::~pmpGui()
-{
+pmpGui::~pmpGui() {
 	delete ui;
 }
 
-void pmpGui::setPlayer(Player *p)
-{
-	player = p;
+void pmpGui::setPlayer(Player *p) {
+	mp = p;
 }
 
-void pmpGui::setPlayList(PlayList *p)
-{
-	pList = p;
+void pmpGui::setPlayList(PlayList *p) {
+	pl = p;
 }
 
-void pmpGui::on_actionQuit_triggered()
-{
+void pmpGui::setCli(Cli* c) {
+	cli = c;
+}
+
+void pmpGui::on_actionQuit_triggered() {
 	close();
 }
 
-void pmpGui::on_cmdBox_returnPressed()
-{
-	//QTextBrowser* tb = ui->outBox;
+void pmpGui::on_cmdBox_returnPressed() {
 	QLineEdit* le = ui->cmdBox;
-	getInput(le->text());
+	inStat is;
+	is = cli->processInput(le->text());
+	switch(is){
+		case inStat::STOP:
+			close();
+			break;
+		case inStat::AGAIN:
+			break;
+		case inStat::NEXT:
+			if(pl->getIndex() == 0){
+				pl->setIndex(-1);
+			}
+			pl->incrementIndex();
+			mp->mpvPlay(pl->getEntry());
+			this->statusBar()->showMessage("Will play index #" + QString::number(pl->getIndex()));
+			printPlayList();
+			break;
+	}
+
 	le->clear();
 }
 
-void pmpGui::getInput(QString in){
-	//QTextBrowser* tb = ui->outBox;
-	QRegExp r1("\\d+");
-	QRegExp r2("^(m|g|d).*");
-	bool play = false;
-
-	if(in.startsWith('l')){
-		printList();
-	}
-	if(in.startsWith('q') || in.startsWith('x')){
-		close();
-		return;
-	}
-	if(r1.exactMatch(in)){
-		if(in.toInt() <= pList->getMaxIndex()){
-			pList->setIndex(in.toInt()-1);
-		}
-		play = true;
-	}
-	if(in.startsWith('r')){
-		pList->decrementIndex();
-		play = true;
-	}
-	if(in.startsWith('h') || in.startsWith('?')){
-		printHelp();
-	}
-	if(in == "")
-		play = true;
-	if(play){
-		pList->incrementIndex();
-		player->mpvPlay(pList->getEntry());
-		printList();
-	}
-}
-
 void pmpGui::printHelp() {
-	QMap<QString,QString> m;
-	QTextBrowser* tb = ui->outBox;
-
-	m.insert("?|h|help",
-					 "This help");
-	m.insert("x",
-					 "Quit and delete .sett file");
-	m.insert("q",
-					 "Quit");
-	m.insert("a|y",
-					 "Delete file");
-	m.insert("d",
-					 "Move file to dir ./.delete");
-	m.insert("dq",
-					 "Move file to dir ./.delete and quit");
-	m.insert("i",
-					 "Toggle forced reindex when playing file");
-	m.insert("r",
-					 "Replay last file");
-	m.insert("l",
-					 "Print playlist");
-	m.insert("#",
-					 "Play file at index # in playlist");
-	m.insert("g",
-					 "Move file to dir ./_gg");
-	m.insert("gq",
-					 "Move file to dir ./_gg and quit");
-	m.insert("m",
-					 "Move file to dir ./sett");
-	m.insert("m <dir>",
-					 "Move file into dir named <dir>");
-	m.insert("mq",
-					 "Move file to dir ./sett and quit");
-	m.insert("s",
-					 "Save playlist into file ./__savelist");
-	m.insert("sq",
-					 "Save playlist into file ./__savelist and quit");
-
-	tb->clear();
-	tb->append(" Command:");
-	foreach(QString k, m.keys()) {
-		tb->append(k.rightJustified(8,' ') + ": " + m[k]);
-	}
+	printList(cli->printHelp());
 }
 
-void pmpGui::printList(){
+void pmpGui::printPlayList(){
+	printList(pl->printList());
+}
+
+void pmpGui::printList(QStringList ls) {
 	QTextBrowser *tb = ui->outBox;
 	tb->clear();
-	foreach(QString x, pList->printList()){
+	foreach(QString x, ls){
 		tb->append(x);
 	}
 }
 
-void pmpGui::showEvent(QShowEvent* ev){
-	//QMainWindow::showEvent(ev);
+void pmpGui::showEvent(QShowEvent* ev) {
+	QMainWindow::showEvent(ev);
 	if(!ev->spontaneous())
-		printList();
+		printPlayList();
 }

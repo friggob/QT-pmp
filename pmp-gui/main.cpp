@@ -5,10 +5,11 @@
 int main(int argc, char *argv[])
 {
 	QApplication a(argc, argv);
-	pmpGui w;
 	QCommandLineParser pa;
 	Player p;
 	PlayList pl;
+	Cli cli(&a, &p, &pl);
+	pmpGui w(0,&cli,&p,&pl);
 
 	a.setApplicationName("pmp-gui");
 	a.setApplicationVersion(APP_VERSION);
@@ -30,7 +31,7 @@ int main(int argc, char *argv[])
 		{"q","Do not wait for commands between playing files"},
 		{"r","Index in playlist to start from","entry"},
 		{"t","Force stereo"},
-		{"x","Don't create .sett file"}
+		{"x","Create __savefile"}
 	});
 
 	pa.process(a);
@@ -50,8 +51,14 @@ int main(int argc, char *argv[])
 		p.setCacheSize(pa.value("c").toInt());
 	p.createArgList();
 
+	cli.setNosett(!pa.isSet("x"));
+	cli.setNodelete(pa.isSet("D"));
+	cli.setMoveFile(pa.isSet("m"));
+	cli.setDeleteFile(pa.isSet("d"));
+
 	w.setPlayer(&p);
 	w.setPlayList(&pl);
+	w.setCli(&cli);
 
 	w.show();
 
