@@ -77,3 +77,8 @@ void Player::setPlayer(QString path){
 bool Player::getcIndex(){
 	return cIndex;
 }
+
+void Player::toggleNosound() {
+	noSound = !noSound;
+	createArgList();
+}

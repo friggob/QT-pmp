@@ -31,6 +31,7 @@ class PLAYERSHARED_EXPORT Player{
 		void mpvPlay(QString entry);
 		void setPlayer(QString path);
 		bool getcIndex();
+		void toggleNosound();
 };
 
 #endif // PLAYER_H

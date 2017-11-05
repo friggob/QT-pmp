@@ -78,7 +78,7 @@ inStat Cli::processInput(QString in){
 		case 'r':
 			pl->decrementIndex();
 			break;
-		case 's':
+		case 's': {
 			QString sfile = "";
 
 			sfile = "__savefile";
@@ -91,6 +91,11 @@ inStat Cli::processInput(QString in){
 			ex = inStat::AGAIN;
 			if(in[1] == 'q')
 				ex = inStat::STOP;
+			break;
+		}
+		case 'n':
+			mp->toggleNosound();
+			ex = inStat::AGAIN;
 			break;
 	}
 	if(re.exactMatch(in)){
@@ -149,6 +154,8 @@ QStringList Cli::printHelp() {
 					 "Replay last file");
 	m.insert("l",
 					 "Print playlist");
+	m.insert("n",
+					 "Toggle no sound setting on player");
 	m.insert("#",
 					 "Play file at index # in playlist");
 	m.insert("g",
