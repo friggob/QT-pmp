@@ -4,6 +4,9 @@
 #include <QFileInfo>
 #include <QMimeDatabase>
 #include <QDebug>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonArray>
 
 PlayList::PlayList()
 {
@@ -97,8 +100,7 @@ QStringList PlayList::exportList(){
 	return pList;
 }
 
-bool PlayList::savePlaylist(QFile* f,bool si = true)
-{
+bool PlayList::savePlaylist(QFile* f, bool si = true, stype st = PlayList::TEXT){
 	if(!f->open(QIODevice::WriteOnly)){
 		qDebug() << "Could not open file" << f->fileName();
 		return false;
@@ -109,16 +111,81 @@ bool PlayList::savePlaylist(QFile* f,bool si = true)
 		return false;
 	}
 
-	foreach(QString x, pList){
-		QString num;
-		num = QString::number(pList.indexOf(x));
-		if(pList.indexOf(x) == pIndex && si && (pIndex != getMaxIndex()))
-			f->write("*");
-		f->write(x.toLocal8Bit()+"\n");
+	if(st == PlayList::TEXT){
+		foreach(QString x, pList){
+			if(pList.indexOf(x) == pIndex && si && (pIndex != getMaxIndex())){
+				f->write("*");
+			}
+			f->write(x.toLocal8Bit()+"\n");
+		}
+	}
+	if(st == PlayList::JSON){
+		QJsonArray ja;
+		foreach(QString x, pList){
+			QJsonObject jo;
+			if(pList.indexOf(x) == pIndex && si && (pIndex != getMaxIndex())){
+				jo["active"] = QJsonValue(true);
+			} else {
+				jo["active"] = QJsonValue(false);
+			}
+			jo["file"] = QJsonValue(x);
+			ja.append(jo);
+		}
+		f->write("//PMP-PLAYLIST\n");
+		f->write(QJsonDocument(ja).toJson(QJsonDocument::Indented));
 	}
 	f->flush();
 	f->close();
 	return true;
+}
+
+QStringList PlayList::read_json(QString fn){
+	QStringList sl;
+	QJsonValue js;
+	QFile fd;
+	fd.setFileName(fn);
+	fd.open(QIODevice::ReadOnly);
+
+	QTextStream ts(&fd);
+
+	QString l = ts.readLine(1000);
+	if(l == "//PMP-PLAYLIST"){
+		// parse_json
+	}
+	QJsonDocument jsonDoc(QJsonDocument::fromJson(ts.readAll().toLocal8Bit()));
+
+	fd.close();
+
+	foreach(js, jsonDoc.array()){
+		QJsonObject jo(js.toObject());
+		if(jo["active"].toBool()){
+			PlayList::settFile = jo["file"].toString();
+		}
+		sl.append(jo["file"].toString());
+	}
+
+	return sl;
+}
+
+QStringList PlayList::read_text(QString fn){
+	QStringList sl;
+	QFile fd;
+	fd.setFileName(fn);
+	fd.open(QIODevice::ReadOnly);
+	QTextStream ts(&fd);
+
+	while(!ts.atEnd()){
+		QString ls = ts.readLine();
+
+		if(ls.startsWith("*")){
+			ls.remove(0,1);
+			PlayList::settFile = ls;
+		}
+		sl.append(ls);
+	}
+	qDebug() << "Added files from textfile!";
+	fd.close();
+	return sl;
 }
 
 int PlayList::createPlayList(QStringList l){
@@ -143,11 +210,12 @@ int PlayList::createPlayList(QStringList l){
 
 		}	else if(mt.inherits("text/plain") && !fi.fileName().endsWith(".sett")){
 			//qStdout() << fi.fileName() << " is a text file, assuming playlist!" << endl;
+			QStringList sl;
+			/*
 			QFile fd;
 			fd.setFileName(p);
 			fd.open(QIODevice::ReadOnly);
 			QTextStream ts(&fd);
-			QStringList sl;
 
 			while(!ts.atEnd()){
 				QString ls = ts.readLine();
@@ -167,6 +235,10 @@ int PlayList::createPlayList(QStringList l){
 			}
 
 			fd.close();
+			*/
+			if((sl = read_json(p)).empty()){
+				sl = read_text(p);
+			}
 			createPlayList(sl);
 		}else if(mt.inherits("text/plain") && fi.fileName().endsWith(".sett")){
 			PlayList::settFile = fi.fileName();

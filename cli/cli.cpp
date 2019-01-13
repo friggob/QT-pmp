@@ -79,9 +79,7 @@ inStat Cli::processInput(QString in){
 			pl->decrementIndex();
 			break;
 		case 's': {
-			QString sfile = "";
-
-			sfile = "__savefile";
+			QString sfile = "__savefile";
 			bool si = true;
 			if(in.left(2) == "s " && in.count() > 2){
 				sfile = in.mid(2).trimmed();
@@ -209,7 +207,7 @@ void Cli::createDir(QString d){
 void Cli::savePLaylist(QString fn, bool si){
 	QFile fd(fn);
 
-	if(!pl->savePlaylist(&fd,si)){
+	if(!pl->savePlaylist(&fd,si,PlayList::JSON)){
 		QString s = "Could not save playlist!";
 		//qDebug() << s;
 		emit statusAvailable(s);

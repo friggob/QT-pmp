@@ -15,6 +15,8 @@ class PLAYLISTSHARED_EXPORT PlayList
 		QStringList pList;
 		void shuffleList();
 		QString settFile;
+		QStringList read_json(QString fn);
+		QStringList read_text(QString fn);
 
 	public:
 		PlayList();
@@ -29,7 +31,8 @@ class PLAYLISTSHARED_EXPORT PlayList
 		void incrementIndex();
 		void decrementIndex();
 		QStringList exportList();
-		bool savePlaylist(QFile *f, bool si);
+		enum stype { JSON, TEXT };
+		bool savePlaylist(QFile *f, bool si, stype st);
 };
 
 #endif // PLAYLIST_H
