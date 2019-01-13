@@ -139,7 +139,7 @@ QStringList Cli::printHelp() {
 	m.insert("?|h|help",
 					 "This help");
 	m.insert("x",
-					 "Quit and delete .sett file");
+					 "Quit and delete __savefile file");
 	m.insert("q",
 					 "Quit");
 	m.insert("a|y",
@@ -169,9 +169,9 @@ QStringList Cli::printHelp() {
 	m.insert("mq",
 					 "Move file to dir ./sett and quit");
 	m.insert("s",
-					 "Save playlist into file ./__savelist");
+					 "Save playlist into file ./__savefile");
 	m.insert("sq",
-					 "Save playlist into file ./__savelist and quit");
+					 "Save playlist into file ./__savefile and quit");
 
 	sl << "Command:";
 	foreach(QString k, m.keys()) {

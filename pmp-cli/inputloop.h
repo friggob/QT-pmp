@@ -15,7 +15,7 @@ class inputLoop : public QObject {
 		Q_OBJECT
 
 	public:
-		inputLoop(QObject* parent = 0, Cli* c = nullptr, Player* p = nullptr, PlayList* l = nullptr);
+		inputLoop(QObject* parent = nullptr, Cli* c = nullptr, Player* p = nullptr, PlayList* l = nullptr);
 		void setQuiet(bool t);
 
 	public slots:

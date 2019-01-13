@@ -14,13 +14,14 @@ inputLoop::inputLoop(QObject *parent, Cli *c, Player *p, PlayList *l) :
 }
 
 void inputLoop::run() {
-	char* buf;
+	char* buf = nullptr;
 	char ps1[] = "Command? ";
 	HIST_ENTRY *he;
-	inStat is;
+	inStat is = inStat::AGAIN;
 
-	if(pl->getIndex() > 0)
+	if(pl->getIndex() > 0) {
 		pl->incrementIndex();
+	}
 	printStatus("Playing index #" + QString::number(pl->getIndex()));
 	mp->mpvPlay(pl->getEntry());
 
@@ -28,11 +29,14 @@ void inputLoop::run() {
 		pl->incrementIndex();
 		mp->mpvPlay(pl->getEntry());
 	}
+	if(quiet){
+		return;
+	}
 
-	while(!quiet && ((buf = readline(ps1)) != NULL) &&
+	while(((buf = readline(ps1)) != nullptr) &&
 				(is = cli->processInput(QString::fromLocal8Bit(buf))) != inStat::STOP) {
 		if(buf[0] != 0){
-			if((he = previous_history()) == NULL ||
+			if((he = previous_history()) == nullptr ||
 				 (QString::fromLocal8Bit(he->line) !=  QString::fromLocal8Bit(buf)))
 			{}
 			add_history(buf);
@@ -66,9 +70,9 @@ void inputLoop::printStatus(const QString s) {
 }
 
 void inputLoop::printHelp() {
-	printList(cli->printHelp());
+	inputLoop::printList(cli->printHelp());
 }
 
 void inputLoop::printPlaylist() {
-	printList(pl->printList());
+	inputLoop::printList(pl->printList());
 }

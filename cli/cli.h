@@ -15,7 +15,7 @@ class CLISHARED_EXPORT Cli : public QObject
 		Q_OBJECT
 
 	public:
-		Cli(QObject* parent = 0, Player* player = nullptr, PlayList* list = nullptr);
+		Cli(QObject* parent = nullptr, Player* player = nullptr, PlayList* list = nullptr);
 		inStat processInput(QString in);
 		void setDeleteFile(bool t);
 		void setMoveFile(bool t);
