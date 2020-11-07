@@ -209,40 +209,17 @@ int PlayList::createPlayList(QStringList l){
 			PlayList::pList.append(p);
 
 		}	else if(mt.inherits("text/plain") && !fi.fileName().endsWith(".sett")){
-			//qStdout() << fi.fileName() << " is a text file, assuming playlist!" << endl;
+			qDebug() << fi.fileName() << " is a text file, assuming playlist!" << endl;
 			QStringList sl;
-			/*
-			QFile fd;
-			fd.setFileName(p);
-			fd.open(QIODevice::ReadOnly);
-			QTextStream ts(&fd);
-
-			while(!ts.atEnd()){
-				QString ls = ts.readLine();
-				QFileInfo fi2(ls);
-
-				if(ls.startsWith("*")){
-					ls.remove(0,1);
-					PlayList::settFile = ls;
-				}
-				if(!l.contains(ls) &&
-					 !l.contains(fi2.absoluteFilePath()) &&
-					 !l.contains(fi2.filePath())){
-					sl.append(ls);
-				}else{
-					qDebug() << "Found duplicate path!" << ls;
-				}
-			}
-
-			fd.close();
-			*/
 			if((sl = read_json(p)).empty()){
 				sl = read_text(p);
+			}else{
+				qDebug() << fi.fileName() << " is a JSON playlist file!" << endl;
 			}
 			createPlayList(sl);
 		}else if(mt.inherits("text/plain") && fi.fileName().endsWith(".sett")){
-			PlayList::settFile = fi.fileName();
-			PlayList::settFile.replace(QString(".sett"),"");
+			PlayList::settFile = fi.fileName().replace(QString(".sett"),"");
+			//PlayList::settFile.replace(QString(".sett"),"");
 
 			qDebug() << "File with .sett file:" << settFile;
 		}else{
